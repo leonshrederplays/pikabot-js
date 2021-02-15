@@ -69,9 +69,4 @@ module.exports = {
 
 		})
 	},
-	blockCommand: (client) => {
-		console.log("");
-		console.log("Started Inhibitor...");
-
-	}
 }

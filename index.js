@@ -1,7 +1,26 @@
-require('log-timestamp')(function() { return "[" + new Date().toLocaleDateString().replace(/(\[.*\])/gm, "") + " | " +  new Date().toLocaleTimeString() + "." + new Date().toISOString().split("T")[1].replace(/(.*:*\d[.])/gm, "").replace("Z", "") +  "]"});
+require('log-timestamp')(function () {
+    return (
+        '[' +
+        new Date().toLocaleDateString().replace(/(\[.*\])/gm, '') +
+        ' | ' +
+        new Date().toLocaleTimeString() +
+        '.' +
+        new Date()
+            .toISOString()
+            .split('T')[1]
+            .replace(/(.*:*\d[.])/gm, '')
+            .replace('Z', '') +
+        ']'
+    );
+});
 require('dotenv').config();
 const { CommandoClient } = require('discord.js-commando');
-const { Structures, MessageEmbed, MessageAttachment, Message } = require('discord.js');
+const {
+    Structures,
+    MessageEmbed,
+    MessageAttachment,
+    Message
+} = require('discord.js');
 
 // Require Structure.
 const { createStructure } = require('./classes/GuildConfig');
@@ -34,65 +53,75 @@ client.registry
     .registerDefaultGroups()
     .registerDefaultTypes()
     .registerDefaultCommands({
-        unknownCommand: false,
+        unknownCommand: false
     })
     // Registers all of your commands in the ./commands/ directory
     .registerCommandsIn(path.join(__dirname, 'commands'));
 
-//Get a Connection to the Discord-Database.
-let dcConnection, twConnection;
-const { dcConnect, twConnect } = require('./sql/connectionHandler.js'); // Require functions.
-
-async function connectDC() {
-    dcConnection = await dcConnect();
-}
-//Get a Connection to the Twitch-Database.
-async function connectTW() {
-    twConnection = await twConnect();
-}
-connectDC(); // Do connect.
-connectTW(); // Do connect.
-
-setTimeout(getConnection, 3000); // Wait for response...
-function getConnection() {
-    if (dcConnection === 'ERROR') {
-        // Retry to get connection.
-        connectDC();
-        return setTimeout(getConnection, 3000);
-    } else if (twConnection === 'ERROR') {
-        // Retry to get connection.
-        connectTW();
-        return setTimeout(getConnection, 3000);
-    }
-
-    // Initialize Database and start Listeners...
-    initBot();
-}
-
-const { sqlInit } = require('./sql/sqlInit'); // Initialize Database.
-function initBot() {
-    sqlInit(dcConnection); // Initialize Database.
-    startListeners(); // Start the Bot...
-}
-
+// Require Handlers and etc...
 // Require OtherHandlers.
-const { 
-  onReady,
-  onVoiceStateUpdate
-} = require('./handlers/otherHandlers');
+const { onReady, onVoiceStateUpdate } = require('./handlers/otherHandlers');
 // Require GuildHandlers.
-const { 
-  onGuildCreate,
-  onGuildDelete,
-  onGuildMemberAdd,
-  onGuildMemberRemove
+const {
+    onGuildCreate,
+    onGuildDelete,
+    onGuildMemberAdd,
+    onGuildMemberRemove
 } = require('./handlers/guildHandlers');
 // Require DebugHandlers.
-const {
-  onDebug,
-  onError,
-  onWarn
-} = require('./handlers/debugHandlers');
+const { onDebug, onError, onWarn } = require('./handlers/debugHandlers');
+
+// Predefine variables to store Database connection.
+let dcConnection, twConnection;
+// Require connect functions.
+const { dcConnect, twConnect } = require('./sql/connectionHandler.js');
+// Require initialize Database function.
+const { sqlInit } = require('./sql/sqlInit');
+connectToDatabase();
+function connectToDatabase() {
+    dcConnect.then(
+        (dcConn) => {
+            // Save Connection to variable.
+            dcConnection = dcConn;
+            let twConnector = () => {
+                twConnect.then(
+                    (twConn) => {
+                        // Save connection to variable.
+                        twConnection = twConn;
+                        setupDatabase();
+                    },
+                    (error) => {
+                        setTimeout(() => {
+                            twConnector();
+                        }, 3000);
+                    }
+                );
+            };
+            twConnector();
+        },
+        (error) => {
+            discordConnection();
+        }
+    );
+}
+
+function setupDatabase() {
+    let initDB = () => {
+        // Initialize Database.
+        sqlInit(dcConnection).then(
+            (success) => {
+                startListeners(); // Start the Bot...
+            },
+            (failed) => {
+                setTimeout(() => {
+                    initDB();
+                }, 3000);
+            }
+        );
+    };
+    initDB();
+}
+
 // Function to start all the Listeners and initialize Database.
 function startListeners() {
     onError(client);
@@ -105,22 +134,41 @@ function startListeners() {
     onGuildMemberRemove(client, MessageEmbed);
     onVoiceStateUpdate(client);
     // Login...
-    client.dispatcher.addInhibitor(message => {
-        if(message.command === null) return(false);
+    client.dispatcher.addInhibitor((message) => {
+        if (message.command === null) return false;
         let guildSettings = message.guild.guildSettings;
-        if(guildSettings.cmdChannel != null) {
-            if(guildSettings.cmdMusicChannel != null && message.command.group.id === 'music' && message.channel.id === guildSettings.cmdMusicChannel) return(false);
+        if (guildSettings.cmdChannel != null) {
+            if (
+                guildSettings.cmdMusicChannel != null &&
+                message.command.group.id === 'music' &&
+                message.channel.id === guildSettings.cmdMusicChannel
+            )
+                return false;
 
-            if(message.channel.id != guildSettings.cmdChannel) {
+            if (message.channel.id != guildSettings.cmdChannel) {
                 message.delete();
-                return(message.reply(`Normale Befehle können nur in: <#${guildSettings.cmdChannel}> benutzt werden.`).then(msg => msg.delete({timeout: 5000})).catch(e => console.log(e)));
+                return message
+                    .reply(
+                        `Normale Befehle können nur in: <#${guildSettings.cmdChannel}> benutzt werden.`
+                    )
+                    .then((msg) => msg.delete({ timeout: 5000 }))
+                    .catch((e) => console.log(e));
             } else {
-                if(guildSettings.cmdMusicChannel != null && message.command.group.id === 'music' && message.channel.id === guildSettings.cmdChannel) {
+                if (
+                    guildSettings.cmdMusicChannel != null &&
+                    message.command.group.id === 'music' &&
+                    message.channel.id === guildSettings.cmdChannel
+                ) {
                     message.delete();
-                    return(message.reply(`Musik Befehle können nur in: <#${guildSettings.cmdMusicChannel}> benutzt werden.`).then(msg => msg.delete({timeout: 5000})).catch(e => console.log(e)));
+                    return message
+                        .reply(
+                            `Musik Befehle können nur in: <#${guildSettings.cmdMusicChannel}> benutzt werden.`
+                        )
+                        .then((msg) => msg.delete({ timeout: 5000 }))
+                        .catch((e) => console.log(e));
                 }
             }
         }
-    })
+    });
     client.login(process.env.TOKEN);
 }
