@@ -1,0 +1,29 @@
+{
+  "name": "pikabot",
+  "version": "1.0.0",
+  "description": "Bot for everything",
+  "main": "index.js",
+  "dependencies": {
+    "@discordjs/opus": "^0.4.0",
+    "canvas": "^2.6.1",
+    "cheerio": "^1.0.0-rc.5",
+    "discord-paginationembed": "^2.1.0",
+    "discord.js": "^12.5.1",
+    "discord.js-commando": "^0.12.2",
+    "discord.js-commando-mysqlprovider": "^0.1.0",
+    "dotenv": "^8.2.0",
+    "emoji-regex": "^9.2.1",
+    "ffmpeg-static": "^4.2.7",
+    "iso-639-1": "^2.1.8",
+    "log-timestamp": "^0.3.0",
+    "mysql": "^2.18.1",
+    "mysql2": "^2.2.5",
+    "simple-youtube-api": "^5.2.1",
+    "ytdl-core": "^4.4.5"
+  },
+  "scripts": {
+    "test": "node ."
+  },
+  "author": "Leon|ShrederPlays",
+  "license": "ISC"
+}

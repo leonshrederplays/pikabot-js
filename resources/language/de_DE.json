@@ -1,0 +1,70 @@
+{
+	"commands": {
+		"8ball": {
+			"description": "Erhalte die Antwort auf alles!",
+			"prompt": "Was möchtest du fragen?",
+			"answers": [
+				{
+				  "text": "Ja."
+				},
+				{
+				  "text": "Nein."
+				},
+				{
+				  "text": "Meine Quellen sagen ja!"
+				},
+				{
+				  "text": "Höchstwahrscheinlich."
+				},
+				{
+				  "text": "Ich weiß nicht."
+				},
+				{
+				  "text": "Vielleicht, manchmal."
+				},
+				{
+				  "text": "Die Aussichten sind gut."
+				},
+				{
+				  "text": "Die Anzeichen deuten auf ein Ja hin."
+				},
+				{
+				  "text": "Definitiv!"
+				},
+				{
+				  "text": "Absolut!"
+				},
+				{
+				  "text": "Nope."
+				},
+				{
+				  "text": "Nein danke, ich werde es nicht schaffen."
+				},
+				{
+				  "text": "Auf keinen Fall!"
+				},
+				{
+				  "text": "Es ist sicher."
+				},
+				{
+				  "text": "Das ist eindeutig so."
+				},
+				{
+				  "text": "Zweifellos."
+				},
+				{
+				  "text": "Ja - auf jeden Fall."
+				},
+				{
+				  "text": "Darauf kannst du dich verlassen."
+				},
+				{
+				  "text": "Meiner Meinung nach, ja."
+				}
+			  ]
+		},
+		"avatar": {
+
+		}
+	}
+}
